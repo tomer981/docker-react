@@ -1,7 +1,13 @@
-FROM node:alpine
-USER node
-RUN mkdir -p /home/node/appWORKDIR /home/node/app 
-COPY --chown=node:node ./package.json ./ 
-RUN npm install 
-COPY --chown=node:node ./ ./
-CMD ["npm", "start"]
+    FROM node:alpine
+    WORKDIR '/app'
+    COPY package.json .
+    RUN npm install -g npm@7.5.3
+    RUN npm install
+ 
+    COPY . .
+    RUN npm run build
+     
+    FROM nginx
+    #adding expose to that AWS elastic beansstalk will expose port to external traffic
+    EXPOSE 80
+    COPY --from=0 /app/build /usr/share/nginx/html
